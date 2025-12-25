@@ -2,9 +2,17 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { BudgetItem } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+// Função para obter o cliente AI de forma segura
+const getAIClient = () => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    console.warn("API_KEY não encontrada em process.env");
+  }
+  return new GoogleGenAI({ apiKey: apiKey as string });
+};
 
 export const analyzeBudgetPhoto = async (base64Image: string): Promise<BudgetItem[]> => {
+  const ai = getAIClient();
   const modelName = 'gemini-3-flash-preview';
   
   const response = await ai.models.generateContent({
