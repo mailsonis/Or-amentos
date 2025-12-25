@@ -121,17 +121,24 @@ const App: React.FC = () => {
     setTimeout(async () => {
       try {
         const canvas = await html2canvas(budgetRef.current!, {
-          scale: 3,
+          scale: 3, // Maior DPI para clareza
           backgroundColor: "#ffffff",
           useCORS: true,
           logging: false,
-          scrollX: 0,
-          scrollY: 0,
-          windowWidth: 1200,
+          width: 1400, // Largura maior para centralização e respiro
+          onclone: (clonedDoc) => {
+             const element = clonedDoc.querySelector('[data-capture-container]') as HTMLElement;
+             if (element) {
+               element.style.width = '1400px';
+               element.style.padding = '60px';
+               element.style.display = 'block';
+               element.style.margin = '0 auto';
+             }
+          }
         });
         
         const link = document.createElement('a');
-        link.download = `orcamento-${Date.now()}.png`;
+        link.download = `orcamento-${companyInfo.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.png`;
         link.href = canvas.toDataURL('image/png', 1.0);
         link.click();
       } catch (error) {
@@ -140,7 +147,7 @@ const App: React.FC = () => {
       } finally {
         setIsCapturing(false);
       }
-    }, 200);
+    }, 400);
   };
 
   if (loading) {
@@ -158,14 +165,18 @@ const App: React.FC = () => {
 
   return (
     <div className={`min-h-screen ${isCapturing ? 'bg-white' : 'bg-slate-50'}`}>
-      <div ref={budgetRef} data-capture-container className={isCapturing ? "w-[1200px] mx-auto bg-white p-10" : "pb-24"}>
+      <div 
+        ref={budgetRef} 
+        data-capture-container 
+        className={isCapturing ? "w-[1400px] mx-auto bg-white" : "pb-24"}
+      >
         <Header 
           info={companyInfo} 
           isCapturing={isCapturing} 
           onEdit={() => setIsEditModalOpen(true)}
         />
         
-        <main className={`max-w-6xl mx-auto px-4 ${isCapturing ? 'px-0' : ''}`}>
+        <main className={`${isCapturing ? 'w-[1400px] px-16' : 'max-w-6xl mx-auto px-4'}`}>
           {!isCapturing && (
             <section className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 mb-8 no-print">
               <div className="flex flex-col items-center">
@@ -203,7 +214,7 @@ const App: React.FC = () => {
             </section>
           )}
 
-          <section className={`bg-white rounded-[2rem] ${isCapturing ? 'border-none' : 'shadow-lg border border-slate-200 overflow-hidden'}`}>
+          <section className={`bg-white ${isCapturing ? 'rounded-none border-t-2 border-slate-100 pt-16' : 'rounded-[2rem] shadow-lg border border-slate-200 overflow-hidden'}`}>
             {!isCapturing && (
               <div className="p-6 md:p-8 bg-slate-50 border-b border-slate-200 flex justify-between items-center no-print">
                 <h3 className="font-bold text-slate-800 text-lg">Itens</h3>
@@ -220,12 +231,12 @@ const App: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-50 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
-                    <th className="py-5 px-6 w-24 text-center">Qtd</th>
-                    <th className="py-5 px-6">Produto</th>
-                    <th className="py-5 px-6 w-40">Valor Unit.</th>
-                    <th className="py-5 px-6 w-40 text-right">Total</th>
-                    {!isCapturing && <th className="py-5 px-6 w-16 no-print"></th>}
+                  <tr className={`bg-slate-50 border-b border-slate-200 ${isCapturing ? 'text-xl py-8' : 'text-[10px] md:text-xs py-5'} text-slate-400 font-bold uppercase tracking-widest`}>
+                    <th className={`py-6 ${isCapturing ? 'px-10 w-32' : 'px-2 md:px-6 w-12 md:w-24'} text-center`}>Qtd</th>
+                    <th className={`py-6 ${isCapturing ? 'px-10' : 'px-2 md:px-6'}`}>Produto</th>
+                    <th className={`py-6 ${isCapturing ? 'px-10 w-48' : 'px-2 md:px-6 w-20 md:w-40'} text-center`}>Unit.</th>
+                    <th className={`py-6 ${isCapturing ? 'px-10 w-48' : 'px-2 md:px-6 w-20 md:w-40'} text-right`}>Total</th>
+                    {!isCapturing && <th className="py-5 px-2 md:px-6 w-10 md:w-16 no-print"></th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -253,43 +264,43 @@ const App: React.FC = () => {
               </table>
             </div>
 
-            <div className={`p-10 flex flex-col items-end border-t border-slate-200 ${isCapturing ? 'bg-white' : 'bg-slate-50'}`}>
-              <div className="w-full md:w-96 space-y-4">
-                <div className="flex justify-between text-slate-500 font-medium">
+            <div className={`${isCapturing ? 'p-16' : 'p-10'} flex flex-col items-end border-t border-slate-200 ${isCapturing ? 'bg-white' : 'bg-slate-50'}`}>
+              <div className={`${isCapturing ? 'w-[500px]' : 'w-full md:w-96'} space-y-6`}>
+                <div className={`flex justify-between text-slate-500 font-bold ${isCapturing ? 'text-2xl' : 'text-base'}`}>
                   <span>Subtotal Bruto</span>
                   <span>{formatCurrency(summary.subtotal)}</span>
                 </div>
                 
-                <div className="flex justify-between items-center bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
+                <div className={`flex justify-between items-center bg-emerald-50 ${isCapturing ? 'p-8 rounded-[2rem]' : 'p-4 rounded-2xl'} border border-emerald-100`}>
                   <div className="flex flex-col">
-                    <span className="text-emerald-700 font-bold text-sm">Desconto À Vista</span>
-                    <span className="text-[10px] text-emerald-600 uppercase tracking-wider font-bold">Economize 10% </span>
+                    <span className={`text-emerald-700 font-black ${isCapturing ? 'text-xl' : 'text-sm'}`}>Desconto À Vista</span>
+                    <span className={`${isCapturing ? 'text-sm' : 'text-[10px]'} text-emerald-600 uppercase tracking-widest font-black`}>Economize 10%</span>
                   </div>
-                  <span className="text-emerald-700 font-black">-{formatCurrency(summary.discountCash)}</span>
+                  <span className={`text-emerald-700 font-black ${isCapturing ? 'text-2xl' : ''}`}>-{formatCurrency(summary.discountCash)}</span>
                 </div>
 
-                <div className="h-px bg-slate-200 my-6"></div>
+                <div className={`bg-slate-200 ${isCapturing ? 'h-1 my-10' : 'h-px my-6'}`}></div>
 
                 <div className="flex justify-between items-baseline">
-                  <span className="text-2xl font-black text-slate-900">Total Geral</span>
+                  <span className={`${isCapturing ? 'text-3xl' : 'text-2xl'} font-black text-slate-900`}>Total Geral</span>
                   <div className="text-right">
-                    <span className="text-4xl font-black text-slate-900">
+                    <span className={`${isCapturing ? 'text-6xl' : 'text-4xl'} font-black text-slate-900`}>
                       {formatCurrency(summary.total)}
                     </span>
                   </div>
                 </div>
                 
-                <div className="p-6 rounded-3xl border-2 border-emerald-500 bg-white mt-6 shadow-sm">
-                  <p className="text-xs text-emerald-600 font-black uppercase mb-1 tracking-widest text-center">Valor no Dinheiro, Pix, Cartão Venc.</p>
-                  <p className="text-4xl font-black text-emerald-600 text-center">{formatCurrency(summary.total - summary.discountCash)}</p>
+                <div className={`${isCapturing ? 'p-10 border-4 mt-10 rounded-[3rem]' : 'p-6 border-2 mt-6 rounded-3xl'} border-emerald-500 bg-white shadow-sm`}>
+                  <p className={`${isCapturing ? 'text-base mb-2' : 'text-xs mb-1'} text-emerald-600 font-black uppercase tracking-widest text-center`}>Valor no Dinheiro, Pix, Cartão Venc.</p>
+                  <p className={`${isCapturing ? 'text-6xl' : 'text-4xl'} font-black text-emerald-600 text-center`}>{formatCurrency(summary.total - summary.discountCash)}</p>
                 </div>
               </div>
             </div>
             
-            <div className="p-10 text-center text-slate-400 text-xs border-t border-slate-100">
-              <p className="font-bold mb-2">Este orçamento é válido por 30 dias corridos.</p>
-              <p>{companyInfo.name} agradece a sua preferência!</p>
-              <p className="mt-4 opacity-40 uppercase tracking-widest text-[9px]">Gerado por Sistema de Orçamentos Inteligente</p>
+            <div className={`${isCapturing ? 'p-16 text-xl' : 'p-10 text-xs'} text-center text-slate-400 border-t border-slate-100`}>
+              <p className="font-bold mb-3">Este orçamento é válido por 30 dias corridos.</p>
+              <p className="text-slate-500 font-medium">{companyInfo.name} agradece a sua preferência!</p>
+              <p className={`${isCapturing ? 'mt-10 text-sm' : 'mt-4 text-[9px]'} opacity-40 uppercase tracking-widest font-bold`}>Gerado por Sistema de Orçamentos Inteligente</p>
             </div>
           </section>
         </main>
@@ -312,11 +323,11 @@ const App: React.FC = () => {
       )}
       
       {isCapturing && (
-        <div className="fixed inset-0 bg-white/90 backdrop-blur-md z-[200] flex items-center justify-center no-print">
-          <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 flex flex-col items-center animate-in zoom-in duration-300">
-            <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-6"></div>
-            <p className="text-slate-900 text-xl font-black mb-2">Gerando Orçamento Profissional</p>
-            <p className="text-slate-500 font-medium">Preparando seu arquivo em alta definição...</p>
+        <div className="fixed inset-0 bg-white/95 backdrop-blur-xl z-[200] flex items-center justify-center no-print">
+          <div className="bg-white p-12 rounded-[4rem] shadow-2xl border border-slate-100 flex flex-col items-center animate-in zoom-in duration-300">
+            <div className="w-20 h-20 border-8 border-emerald-500 border-t-transparent rounded-full animate-spin mb-8"></div>
+            <p className="text-slate-900 text-2xl font-black mb-3">Finalizando seu Orçamento</p>
+            <p className="text-slate-500 text-lg font-medium">Exportando imagem em ultra definição...</p>
           </div>
         </div>
       )}
