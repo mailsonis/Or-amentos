@@ -22,10 +22,10 @@ const BudgetItemRow: React.FC<BudgetItemRowProps> = ({ item, onUpdate, onRemove,
         <td className="py-8 px-6 text-slate-800 text-2xl font-medium">
           {item.description}
         </td>
-        <td className="py-8 px-6 text-slate-600 text-2xl text-center">
+        <td className="py-8 px-6 text-slate-600 text-2xl text-center font-bold">
           {formatCurrency(item.unitPrice)}
         </td>
-        <td className="py-8 px-6 font-black text-slate-900 text-right text-2xl">
+        <td className="py-8 px-6 text-slate-900 text-right text-2xl font-bold">
           {formatCurrency(itemTotal)}
         </td>
         <td className="w-0 p-0 overflow-hidden"></td>
@@ -61,12 +61,12 @@ const BudgetItemRow: React.FC<BudgetItemRowProps> = ({ item, onUpdate, onRemove,
             step="0.01"
             value={item.unitPrice || ""}
             onChange={(e) => onUpdate(item.id, { unitPrice: Number(e.target.value) })}
-            className="w-16 md:w-24 bg-transparent border-b border-transparent focus:border-emerald-500 outline-none text-center"
+            className="w-16 md:w-24 bg-transparent border-b border-transparent focus:border-emerald-500 outline-none text-center text-sm md:text-base"
             placeholder="0,00"
           />
         </div>
       </td>
-      <td className="py-3 px-1 md:px-4 font-semibold text-slate-800 text-right text-xs md:text-base">
+      <td className="py-3 px-1 md:px-4 font-semibold text-slate-800 text-right text-sm md:text-base">
         {formatCurrency(itemTotal)}
       </td>
       <td className="py-3 px-1 md:px-4 text-right no-print">

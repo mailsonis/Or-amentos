@@ -118,21 +118,31 @@ const App: React.FC = () => {
     
     setIsCapturing(true);
 
+    // Pequeno delay para garantir que o estado 'isCapturing' afetou o DOM
     setTimeout(async () => {
       try {
         const canvas = await html2canvas(budgetRef.current!, {
-          scale: 3, // Maior DPI para clareza
+          scale: 2.5, // Equilíbrio entre qualidade e performance
           backgroundColor: "#ffffff",
           useCORS: true,
           logging: false,
-          width: 1400, // Largura maior para centralização e respiro
+          width: 1200, // Largura exata do documento para preencher o PNG
           onclone: (clonedDoc) => {
-             const element = clonedDoc.querySelector('[data-capture-container]') as HTMLElement;
-             if (element) {
-               element.style.width = '1400px';
-               element.style.padding = '60px';
-               element.style.display = 'block';
-               element.style.margin = '0 auto';
+             const container = clonedDoc.querySelector('[data-capture-container]') as HTMLElement;
+             if (container) {
+               container.style.width = '1200px';
+               container.style.padding = '0';
+               container.style.margin = '0';
+               container.style.backgroundColor = 'white';
+             }
+             const paper = clonedDoc.querySelector('[data-budget-paper]') as HTMLElement;
+             if (paper) {
+               paper.style.width = '1200px';
+               paper.style.margin = '0';
+               paper.style.padding = '40px'; // Padding interno para o conteúdo não tocar a borda absoluta do arquivo
+               paper.style.backgroundColor = 'white';
+               paper.style.boxShadow = 'none'; // Remove a sombra para o fundo ficar plano no PNG
+               paper.style.borderRadius = '0'; // Remove arredondamento para ocupar todos os cantos
              }
           }
         });
@@ -147,7 +157,7 @@ const App: React.FC = () => {
       } finally {
         setIsCapturing(false);
       }
-    }, 400);
+    }, 500);
   };
 
   if (loading) {
@@ -164,131 +174,138 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className={`min-h-screen ${isCapturing ? 'bg-white' : 'bg-slate-50'}`}>
+    <div className={`min-h-screen ${isCapturing ? 'bg-white overflow-hidden' : 'bg-slate-50'}`}>
+      {/* Wrapper de Captura */}
       <div 
         ref={budgetRef} 
         data-capture-container 
-        className={isCapturing ? "w-[1400px] mx-auto bg-white" : "pb-24"}
+        className={isCapturing ? "w-[1200px]" : "pb-24"}
       >
-        <Header 
-          info={companyInfo} 
-          isCapturing={isCapturing} 
-          onEdit={() => setIsEditModalOpen(true)}
-        />
-        
-        <main className={`${isCapturing ? 'w-[1400px] px-16' : 'max-w-6xl mx-auto px-4'}`}>
-          {!isCapturing && (
-            <section className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 mb-8 no-print">
-              <div className="flex flex-col items-center">
-                <div className="w-full">
-                  <h2 className="text-xl font-bold text-slate-800 mb-2">Novo Orçamento Inteligente</h2>
-                  <p className="text-slate-500 mb-6">Tire uma foto da sua lista para que nossa IA organize tudo para você.</p>
-                  
-                  <div className="relative group">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                      disabled={isAnalyzing}
-                    />
-                    <div className={`border-2 border-dashed rounded-3xl p-10 flex flex-col items-center justify-center transition-all ${isAnalyzing ? 'bg-slate-50 border-slate-200' : 'border-emerald-200 bg-emerald-50 group-hover:bg-emerald-100 group-hover:border-emerald-300'}`}>
-                      {isAnalyzing ? (
-                        <div className="flex flex-col items-center">
-                          <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                          <p className="text-emerald-700 font-medium animate-pulse">Analisando imagem com IA...</p>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="w-14 h-14 bg-emerald-500 rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg shadow-emerald-200">
-                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        {/* Folha do Orçamento */}
+        <div 
+          data-budget-paper
+          className={isCapturing ? "w-[1200px] bg-white p-12" : "w-full"}
+        >
+          <Header 
+            info={companyInfo} 
+            isCapturing={isCapturing} 
+            onEdit={() => setIsEditModalOpen(true)}
+          />
+          
+          <main className={isCapturing ? 'px-8' : 'max-w-6xl mx-auto px-4'}>
+            {!isCapturing && (
+              <section className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 mb-8 no-print">
+                <div className="flex flex-col items-center">
+                  <div className="w-full">
+                    <h2 className="text-xl font-bold text-slate-800 mb-2">Novo Orçamento Inteligente</h2>
+                    <p className="text-slate-500 mb-6">Tire uma foto da sua lista para que nossa IA organize tudo para você.</p>
+                    
+                    <div className="relative group">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        disabled={isAnalyzing}
+                      />
+                      <div className={`border-2 border-dashed rounded-3xl p-10 flex flex-col items-center justify-center transition-all ${isAnalyzing ? 'bg-slate-50 border-slate-200' : 'border-emerald-200 bg-emerald-50 group-hover:bg-emerald-100 group-hover:border-emerald-300'}`}>
+                        {isAnalyzing ? (
+                          <div className="flex flex-col items-center">
+                            <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                            <p className="text-emerald-700 font-medium animate-pulse">Analisando imagem com IA...</p>
                           </div>
-                          <p className="text-slate-700 font-semibold">Selecione ou arraste a foto</p>
-                          <p className="text-slate-400 text-sm mt-1">PNG ou JPG</p>
-                        </>
-                      )}
+                        ) : (
+                          <>
+                            <div className="w-14 h-14 bg-emerald-500 rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg shadow-emerald-200">
+                              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            </div>
+                            <p className="text-slate-700 font-semibold">Selecione ou arraste a foto</p>
+                            <p className="text-slate-400 text-sm mt-1">PNG ou JPG</p>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </section>
-          )}
-
-          <section className={`bg-white ${isCapturing ? 'rounded-none border-t-2 border-slate-100 pt-16' : 'rounded-[2rem] shadow-lg border border-slate-200 overflow-hidden'}`}>
-            {!isCapturing && (
-              <div className="p-6 md:p-8 bg-slate-50 border-b border-slate-200 flex justify-between items-center no-print">
-                <h3 className="font-bold text-slate-800 text-lg">Itens</h3>
-                <button 
-                  onClick={handleAddItem}
-                  className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors shadow-sm"
-                >
-                  <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
-                  Adicionar
-                </button>
-              </div>
+              </section>
             )}
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className={`bg-slate-50 border-b border-slate-200 ${isCapturing ? 'text-xl py-8' : 'text-[10px] md:text-xs py-5'} text-slate-400 font-bold uppercase tracking-widest`}>
-                    <th className={`py-6 ${isCapturing ? 'px-10 w-32' : 'px-2 md:px-6 w-12 md:w-24'} text-center`}>Qtd</th>
-                    <th className={`py-6 ${isCapturing ? 'px-10' : 'px-2 md:px-6'}`}>Produto</th>
-                    <th className={`py-6 ${isCapturing ? 'px-10 w-48' : 'px-2 md:px-6 w-20 md:w-40'} text-center`}>Unit.</th>
-                    <th className={`py-6 ${isCapturing ? 'px-10 w-48' : 'px-2 md:px-6 w-20 md:w-40'} text-right`}>Total</th>
-                    {!isCapturing && <th className="py-5 px-2 md:px-6 w-10 md:w-16 no-print"></th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="py-24 text-center text-slate-400">
-                        <div className="flex flex-col items-center">
-                          <svg className="w-16 h-16 mb-4 opacity-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                          Nenhum item adicionado.
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    items.map(item => (
-                      <BudgetItemRow 
-                        key={item.id} 
-                        item={item} 
-                        onUpdate={handleUpdateItem} 
-                        onRemove={handleRemoveItem} 
-                        isCapturing={isCapturing}
-                      />
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+            <section className={`bg-white ${isCapturing ? 'pt-8 border-t-2 border-slate-100' : 'rounded-[2rem] shadow-lg border border-slate-200 overflow-hidden'}`}>
+              {!isCapturing && (
+                <div className="p-6 md:p-8 bg-slate-50 border-b border-slate-200 flex justify-between items-center no-print">
+                  <h3 className="font-bold text-slate-800 text-lg">Itens</h3>
+                  <button 
+                    onClick={handleAddItem}
+                    className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors shadow-sm"
+                  >
+                    <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
+                    Adicionar
+                  </button>
+                </div>
+              )}
 
-            <div className={`${isCapturing ? 'p-16' : 'p-10'} flex flex-col items-end border-t border-slate-200 ${isCapturing ? 'bg-white' : 'bg-slate-50'}`}>
-              <div className={`${isCapturing ? 'w-[500px]' : 'w-full md:w-96'} space-y-6`}>
-                <div className="flex justify-between items-baseline">
-                  <span className={`${isCapturing ? 'text-3xl' : 'text-2xl'} font-black text-slate-900`}>Total Geral</span>
-                  <div className="text-right">
-                    <span className={`${isCapturing ? 'text-6xl' : 'text-4xl'} font-black text-slate-900`}>
-                      {formatCurrency(summary.total)}
-                    </span>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className={`bg-slate-50 border-b border-slate-200 ${isCapturing ? 'text-xl py-8' : 'text-[10px] md:text-xs py-5'} text-slate-400 font-bold uppercase tracking-widest`}>
+                      <th className={`py-6 ${isCapturing ? 'px-8 w-32' : 'px-2 md:px-6 w-12 md:w-24'} text-center`}>Qtd</th>
+                      <th className={`py-6 ${isCapturing ? 'px-8' : 'px-2 md:px-6'}`}>Produto</th>
+                      <th className={`py-6 ${isCapturing ? 'px-8 w-48' : 'px-2 md:px-6 w-20 md:w-40'} text-center`}>Unit.</th>
+                      <th className={`py-6 ${isCapturing ? 'px-8 w-48' : 'px-2 md:px-6 w-20 md:w-40'} text-right`}>Total</th>
+                      {!isCapturing && <th className="py-5 px-2 md:px-6 w-10 md:w-16 no-print"></th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="py-24 text-center text-slate-400">
+                          <div className="flex flex-col items-center">
+                            <svg className="w-16 h-16 mb-4 opacity-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                            Nenhum item adicionado.
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      items.map(item => (
+                        <BudgetItemRow 
+                          key={item.id} 
+                          item={item} 
+                          onUpdate={handleUpdateItem} 
+                          onRemove={handleRemoveItem} 
+                          isCapturing={isCapturing}
+                        />
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className={`${isCapturing ? 'p-12' : 'p-10'} flex flex-col items-end border-t border-slate-200 ${isCapturing ? 'bg-white' : 'bg-slate-50'}`}>
+                <div className={`${isCapturing ? 'w-[500px] space-y-12' : 'w-full md:w-96 space-y-6'}`}>
+                  <div className={`flex justify-between items-baseline px-2`}>
+                    <span className={`${isCapturing ? 'text-6xl' : 'text-4xl'} font-black text-slate-900`}>Total Geral</span>
+                    <div className="text-right">
+                      <span className={`${isCapturing ? 'text-6xl' : 'text-4xl'} font-black text-slate-900`}>
+                        {formatCurrency(summary.total)}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className={`${isCapturing ? 'p-10 border-4 rounded-[3rem]' : 'p-6 border-2 rounded-3xl'} border-emerald-500 bg-white shadow-sm`}>
+                    <p className={`${isCapturing ? 'text-base mb-2' : 'text-xs mb-1'} text-emerald-600 font-black uppercase tracking-widest text-center`}>Desconto de 10% à vista</p>
+                    <p className={`${isCapturing ? 'text-6xl' : 'text-4xl'} font-black text-emerald-600 text-center`}>{formatCurrency(summary.total - summary.discountCash)}</p>
                   </div>
                 </div>
-                
-                <div className={`${isCapturing ? 'p-10 border-4 mt-10 rounded-[3rem]' : 'p-6 border-2 mt-6 rounded-3xl'} border-emerald-500 bg-white shadow-sm`}>
-                  <p className={`${isCapturing ? 'text-base mb-2' : 'text-xs mb-1'} text-emerald-600 font-black uppercase tracking-widest text-center`}>Valor no Dinheiro, Pix, Cartão Venc.</p>
-                  <p className={`${isCapturing ? 'text-6xl' : 'text-4xl'} font-black text-emerald-600 text-center`}>{formatCurrency(summary.total - summary.discountCash)}</p>
-                </div>
               </div>
-            </div>
-            
-            <div className={`${isCapturing ? 'p-16 text-xl' : 'p-10 text-xs'} text-center text-slate-400 border-t border-slate-100`}>
-              <p className="font-bold mb-3">Este orçamento é válido por 30 dias corridos.</p>
-              <p className="text-slate-500 font-medium">{companyInfo.name} agradece a sua preferência!</p>
-              <p className={`${isCapturing ? 'mt-10 text-sm' : 'mt-4 text-[9px]'} opacity-40 uppercase tracking-widest font-bold`}>Gerado por Sistema de Orçamentos Inteligente</p>
-            </div>
-          </section>
-        </main>
+              
+              <div className={`${isCapturing ? 'p-12 text-xl' : 'p-10 text-xs'} text-center text-slate-400 border-t border-slate-100`}>
+                <p className="font-bold mb-3">Este orçamento é válido por 30 dias corridos.</p>
+                <p className="text-slate-500 font-medium">{companyInfo.name} agradece a sua preferência!</p>
+                <p className={`${isCapturing ? 'mt-10 text-sm' : 'mt-4 text-[9px]'} opacity-40 uppercase tracking-widest font-bold`}>Gerado por Sistema de Orçamentos Inteligente</p>
+              </div>
+            </section>
+          </main>
+        </div>
       </div>
 
       {!isCapturing && (
@@ -308,11 +325,11 @@ const App: React.FC = () => {
       )}
       
       {isCapturing && (
-        <div className="fixed inset-0 bg-white/95 backdrop-blur-xl z-[200] flex items-center justify-center no-print">
-          <div className="bg-white p-12 rounded-[4rem] shadow-2xl border border-slate-100 flex flex-col items-center animate-in zoom-in duration-300">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[200] flex items-center justify-center no-print">
+          <div className="bg-white p-12 rounded-[4rem] shadow-2xl flex flex-col items-center animate-in zoom-in duration-300">
             <div className="w-20 h-20 border-8 border-emerald-500 border-t-transparent rounded-full animate-spin mb-8"></div>
-            <p className="text-slate-900 text-2xl font-black mb-3">Finalizando seu Orçamento</p>
-            <p className="text-slate-500 text-lg font-medium">Exportando imagem em ultra definição...</p>
+            <p className="text-slate-900 text-2xl font-black mb-3">Exportando Orçamento</p>
+            <p className="text-slate-500 text-lg font-medium">Aguarde um instante...</p>
           </div>
         </div>
       )}
