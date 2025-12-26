@@ -284,7 +284,9 @@ const App: React.FC = () => {
               <div className={`${isCapturing ? 'p-12' : 'p-10'} flex flex-col items-end border-t border-slate-200 ${isCapturing ? 'bg-white' : 'bg-slate-50'}`}>
                 <div className={`${isCapturing ? 'w-[500px] space-y-12' : 'w-full md:w-96 space-y-6'}`}>
                   <div className={`flex justify-between items-baseline px-2`}>
-                    <span className={`${isCapturing ? 'text-6xl' : 'text-4xl'} font-black text-slate-900`}>Total Geral</span>
+                    <span className={`${isCapturing ? 'text-6xl' : 'text-4xl'} font-black text-slate-900`}>
+                      Total<span className="hidden md:inline"> Geral</span>
+                    </span>
                     <div className="text-right">
                       <span className={`${isCapturing ? 'text-6xl' : 'text-4xl'} font-black text-slate-900`}>
                         {formatCurrency(summary.total)}
