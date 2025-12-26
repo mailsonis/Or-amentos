@@ -1,0 +1,18 @@
+{
+  "name": "Sistema de Orçamentos Inteligente",
+  "short_name": "Smart Budget",
+  "description": "Gere orçamentos profissionais instantaneamente com ajuda de IA.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#10b981",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1055/1055644.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
